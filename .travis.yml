@@ -3,13 +3,10 @@ language: python
 
 arch:
   - amd64
-  - ppc64le
 
 python:
   - 3.7
 
-install:
-  - pip install -r requirements.txt
-
 script:
   - python -m unittest test_atomicwrite.py
+  - python parquet_demo.py
