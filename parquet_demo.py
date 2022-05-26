@@ -1,5 +1,5 @@
 import os
-import pandas as pd
+import unittest
 
 from atomicwrite import atomic_write
 
@@ -7,20 +7,27 @@ from atomicwrite import atomic_write
 def my_writer(content, file, mode='wb', encoding=None):
     pass
 
+class AtomicWriteTest(unittest.TestCase):
+    def setUp(self):
+        self.parquet_file = './userdata1.parquet'
+        self.saved_file = './res.parquet'
+    
+    
+    def test_parquet_file(self):
+        
+        f = open(self.parquet_file, 'rb')
+        data = f.read()
+        f.close()
+        my_writer(content=data, file=self.saved_file, mode='wb')
+        
+        f = open(self.saved_file, "rb")
+        res = f.read()
+        f.close()
+        try:
+            self.assertEqual(data, res)
+        finally:
+            os.remove(self.saved_file)
 
+     
 if __name__ == "__main__":
-    parquet_file = './userdata1.parquet'
-    save_file = './res.parquet'
-    
-    f = open(parquet_file, 'rb')
-    data = f.read()
-    f.close()
-    my_writer(content=data, file=save_file, mode='wb')
-    
-    df = pd.read_parquet(parquet_file, engine='pyarrow')
-    df2 = pd.read_parquet(save_file, engine='pyarrow')
-    
-    try:
-        assert df.equals(df2), 'Failed'
-    finally:
-        os.remove(save_file)
+    unittest.main()
