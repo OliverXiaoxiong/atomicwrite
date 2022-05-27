@@ -8,7 +8,7 @@ A simple implementation of decorator  to guarantee that the data is not partiall
 from atomicwrite import atomic_write
 
 @atomic_write
-my_writer(content, file, mode='wb'):
+my_writer(content: str, file: str, mode = Optional[str] = 'wb') -> None:
     pass
 ```
 
