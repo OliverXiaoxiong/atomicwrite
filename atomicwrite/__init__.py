@@ -6,29 +6,43 @@ import tempfile
 from functools import wraps
 
 
-def atomic_write(func):
-    @wraps(func)
+def atomic_write(function):
+    ''' 
+    An decorator for performing atomic writes. Usage:
+    
+        @atomic_write
+        def my_writer(content, file, mode='wb', encoding=None):
+            pass
+    '''
+    
+    @wraps(function)
     def wrappers(*args, **kwargs):
-        def deep_copy(source, target):
+        
+        def _copy(source: str, target: str):
             
             shutil.copy2(source, target)
             st = os.stat(source)
             os.chown(target, st[stat.ST_UID], st[stat.ST_GID])
-
-        def temp_write(*args, **kwargs):
+        
+        
+        def _write(*args, **kwargs):
+            
             content = kwargs.get('content', '')
-            file = kwargs.get('file', None)
+            file = kwargs.get('file', '')
             mode = kwargs.get('mode', None)
+            encoding = kwargs.get('encoding', None)
             
             # crreate temproary file in the same directory
             fd = tempfile.NamedTemporaryFile(delete=False, dir=os.path.dirname(file))
 
+            kwargs['file'] = fd.name
+            
             try:
                
                 if os.path.exists(file):
-                    deep_copy(file, fd.name)  # keep the metadata if it exists
-                if kwargs.get('encoding', None):
-                    f = codecs.open(fd.name, mode, kwargs['encoding']) # using codecs open for encoding method
+                    _copy(file, fd.name)  # keep the metadata if it exists
+                if encoding:
+                    f = codecs.open(fd.name, mode, encoding) # using codecs open for encoding method
                 else:
                     f = open(fd.name, mode)
                 f.write(content)
@@ -43,11 +57,12 @@ def atomic_write(func):
                         os.unlink(fd.name) # remove temporary file
                     except:
                         pass
+                    
         try:
-            temp_write(*args, **kwargs)
-            return func(*args, **kwargs)
+            _write(*args, **kwargs)
+            return function(*args, **kwargs)
         except:
-            raise SystemExit("Atomic writing failed.")
+            pass
 
     return wrappers
 

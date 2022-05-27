@@ -4,15 +4,28 @@ import codecs
 from atomicwrite import atomic_write
 
 
-def create_file(file, content=b'Hello World\n', mode=None):
+def create_file(file, content=b'Hello World\n', chmode=None):
+    '''Atomic write content to file
+    
+    :param file: str, the destination file path 
+    :param content: str, the file content
+    :param chmode: optional str, the ownership permission
+    '''
     with open(file, 'wb') as f:
         f.write(content)
-    if mode:
-        os.chmod(file, mode)
+    if chmode:
+        os.chmod(file, chmode)
 
         
 @atomic_write
 def my_writer(content, file, mode='wb', encoding=None):
+    '''Atomic write content to file
+    
+    :param content: str, the file content
+    :param file: str, the destination file path 
+    :param mode: str, the file mode for the temporary file
+    :param encoding: optional str, the encoding method
+    '''
     pass
 
 
@@ -54,7 +67,7 @@ class AtomicWriteTest(unittest.TestCase):
     def test_permission(self):
         
         test_mode = 0o741
-        create_file(self.file, mode=test_mode)
+        create_file(self.file, chmode=test_mode)
         my_writer(content=self.content, file=self.file, mode=self.mode)
 
         st_mode = os.lstat(self.file).st_mode & 0o777

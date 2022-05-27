@@ -5,6 +5,13 @@ from atomicwrite import atomic_write
 
 @atomic_write
 def my_writer(content, file, mode='wb', encoding=None):
+    '''Atomic write content to file
+    
+    :param content: str, file content
+    :param file: str, the destination file path 
+    :param mode: str, the file mode for the temporary file
+    :param encoding: optional str, the encoding method
+    '''
     pass
 
 class AtomicWriteTest(unittest.TestCase):
