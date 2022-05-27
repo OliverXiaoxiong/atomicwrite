@@ -16,29 +16,31 @@ def atomic_write(func):
             os.chown(target, st[stat.ST_UID], st[stat.ST_GID])
 
         def temp_write(*args, **kwargs):
-            content = kwargs['content']
-            file = kwargs['file']
-            mode = kwargs['mode']
+            content = kwargs.get('content', '')
+            file = kwargs.get('file', None)
+            mode = kwargs.get('mode', None)
+            
+            # crreate temproary file in the same directory
             fd = tempfile.NamedTemporaryFile(delete=False, dir=os.path.dirname(file))
 
             try:
-                # preserve file metadata if it already exists
+               
                 if os.path.exists(file):
-                    deep_copy(file, fd.name)
+                    deep_copy(file, fd.name)  # keep the metadata if it exists
                 if kwargs.get('encoding', None):
-                    f = codecs.open(fd.name, mode, kwargs['encoding'])
+                    f = codecs.open(fd.name, mode, kwargs['encoding']) # using codecs open for encoding method
                 else:
                     f = open(fd.name, mode)
                 f.write(content)
                 f.flush()
-                os.fsync(f.fileno())
+                os.fsync(f.fileno()) # make sure file contents is written to the temporary file
                 f.close()
 
-                os.replace(fd.name, file)
+                os.replace(fd.name, file) # replace file 
             finally:
                 if os.path.exists(fd.name):
                     try:
-                        os.unlink(fd.name)
+                        os.unlink(fd.name) # remove temporary file
                     except:
                         pass
         try:
